@@ -1,0 +1,16 @@
+{
+  "hardware": "LX04",
+  "account": "",
+  "password": "",
+  "mi_did": "",
+  "bot": "deepseek-flash",
+  "openai_key": "",
+  "openai_backend": "https://api.deepseek.com",
+  "gpt_options": {
+    "thinking": { "type": "disabled" }
+  },
+  "use_command": true,
+  "stream": false,
+  "verbose": false,
+  "prompt": "请用简洁自然的中文回答，适合语音朗读，通常控制在150字以内。不要编造实时天气或声称已经控制设备。"
+}

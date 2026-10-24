@@ -1,0 +1,21 @@
+name: Test and ARMv7 build
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  client:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
+        with:
+          go-version-file: .go-version
+          cache-dependency-path: |
+            client/go.sum
+            third_party/ninego/*/go.sum
+      - name: Source, privacy, and unit checks
+        run: make test
+      - name: Build four speaker-side commands
+        run: make build

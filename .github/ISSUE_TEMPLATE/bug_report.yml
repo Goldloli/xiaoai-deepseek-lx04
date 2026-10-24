@@ -1,0 +1,24 @@
+name: 故障反馈 / Bug report
+description: 提交脱敏后的机型、固件、复现步骤与预期行为
+body:
+  - type: markdown
+    attributes:
+      value: 请勿提交账号、Key、令牌、验证码、原始对话日志、序列号、MAC 或固件备份。未验证型号请明确标注。
+  - type: input
+    id: environment
+    attributes:
+      label: 型号、固件与源码版本
+      placeholder: LX04 / 2.42.118 / commit 或 tag
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤、实际行为与预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 脱敏证据与已尝试的处理
+      description: 优先提供错误状态及必要片段，不上传原始文件。

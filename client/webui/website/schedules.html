@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>定时任务</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .tasks-container {
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 80vh;
+            gap: 20px;
+        }
+
+        .task-list-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .task-detail-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .section-title {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .back-btn {
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .add-task-btn {
+            padding: 8px 15px;
+            border: 2px solid #007bff;
+            background-color: white;
+            color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+
+        .add-task-btn:hover {
+            background-color: #e3f2fd;
+            color: #0056b3;
+        }
+
+        .task-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .task-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .task-item.active {
+            background-color: #e3f2fd;
+            border-left-color: #007bff;
+        }
+
+        .task-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .task-start-date {
+            font-size: 0.85em;
+            color: #666;
+        }
+
+        .task-next-execution {
+            font-size: 0.85em;
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .task-item-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .task-time-name {
+            font-weight: 600;
+        }
+
+        .task-toggle {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .task-toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+
+        .task-toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .task-toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+
+        .task-toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .task-toggle-slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .task-toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        .task-cycle {
+            font-size: 0.85em;
+            color: #666;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group.inline {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group.inline .form-label {
+            margin-bottom: 0;
+            white-space: nowrap;
+            min-width: 80px;
+        }
+
+        .form-group.inline .form-input {
+            flex: 1;
+        }
+
+        .form-group.section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+        }
+
+        .form-group.section .form-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            margin-top: 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        .date-time-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .date-time-group > div {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-group.horizontal {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .checkbox-option input {
+            margin: 0;
+            accent-color: #007bff;
+        }
+
+        .checkbox-option input:checked + span {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .radio-option input:checked + span {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .time-picker {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .time-input {
+            text-align: center;
+            padding: 10px 5px;
+        }
+
+        .time-btn {
+            position: absolute;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #007bff;
+            padding: 2px;
+        }
+
+        .time-btn.up {
+            top: 2px;
+        }
+
+        .time-btn.down {
+            bottom: 2px;
+        }
+
+        .time-btn:hover {
+            color: #0056b3;
+        }
+
+        .roller-time-picker {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-value {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+            min-width: 50px;
+            text-align: center;
+            cursor: text;
+            user-select: none; /* 默认不允许选中文本 */
+            border-radius: 4px;
+            padding: 2px 5px;
+            transition: background-color 0.2s;
+        }
+
+        .time-value:hover {
+            background-color: #e3f2fd;
+        }
+
+        .time-value:focus {
+            outline: 2px solid #007bff;
+            outline-offset: 2px;
+            background-color: #e3f2fd;
+        }
+
+        .time-value::selection {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .time-labels {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .time-label {
+            font-size: 0.8em;
+            color: #666;
+            cursor: pointer;
+            user-select: none;
+            padding: 2px 5px;
+        }
+
+        .time-label:hover {
+            color: #007bff;
+        }
+
+        .time-label.current {
+            font-weight: 600;
+            color: #333;
+            cursor: default;
+        }
+
+        .radio-option:hover {
+            background-color: #e9ecef;
+        }
+
+        .radio-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .number-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .number-btn {
+            width: 36px;
+            height: 36px;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .number-btn:hover {
+            border-color: #007bff;
+            background-color: #e3f2fd;
+        }
+
+        .number-btn.active {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .sub-form-group {
+            margin-left: 30px;
+            margin-top: 10px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border-left: 3px solid #e9ecef;
+        }
+
+        .duration-inputs {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .duration-inputs > div {
+            flex: 1;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+.responsive-container {
+  display: flex;
+  flex-wrap: wrap; /* 核心属性：允许换行 */
+  gap: 30px;
+  align-items: center;
+}
+
+.time-picker-container {
+  flex: 0 0 auto; /* 不伸缩、不收缩 */
+  margin-top: 0;
+  transition: margin 0.3s;
+}
+
+        @media (max-width: 768px) {
+            .tasks-container {
+                flex-direction: column;
+                height: auto;
+                min-height: 80vh;
+            }
+
+            .task-list-section,
+            .task-detail-section {
+                min-height: 160px;
+            }
+
+            .date-time-group {
+                flex-direction: column;
+            }
+
+            .number-buttons {
+                justify-content: center;
+            }
+            
+            .responsive-container {
+              flex-direction: column;
+              align-items: flex-start;
+            }
+            
+            .time-picker-container {
+              margin-top: 20px; /* 下移间距 */
+              padding-left: 0 !important; /* 清除原有内边距 */
+              width: 100%; /* 占满宽度 */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="tasks-container">
+        <div class="task-list-section">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa fa-arrow-left"></i>返回
+            </button>
+            
+            <h2 class="section-title">定时任务列表</h2>
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                <button class="add-task-btn" onclick="addNewTask()">
+                    <i class="fa fa-plus"></i>新建任务
+                </button>
+                <label class="form-label" id="alarmTime">下次执行时间</label>
+            </div>            
+            <div class="task-list" id="taskList">
+                <!-- 任务项将通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <div class="task-detail-section">
+            <h2 class="section-title">任务设置</h2>
+            
+            <div class="form-group inline">
+                <label class="form-label">任务信息：</label>
+                <input type="text" class="form-input" id="taskName" placeholder="请输入任务名称">
+                <button type="button" class="btn" style="margin-left: 10px;" onclick="checkAndOpenScriptEditor()">编辑脚本</button>
+            </div>
+            
+            <div class="form-group section">
+                <label class="form-label">开始</label>
+<div class="responsive-container"> <!-- 新增响应式容器 -->
+                <div class="date-time-group"> <!-- 包裹左侧日期选择区域 -->
+                    <div style="display: flex; align-items: center; gap: 30px;">
+                        <div style="width: 400px;">
+                            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                <label class="checkbox-option" style="margin-bottom: 0;">
+                                    <span>开始日期：</span>
+                                    <input type="checkbox" id="useLunar" onclick="toggleLunarDate()">
+                                    <span>农历</span>
+                                </label>
+                                <span id="lunarDate" style="font-size: 0.85em; color: #666; display: none;">xxxx</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <input type="date" class="form-input" id="taskStartDate" style="font-size: 0.85em; width: 220px;" onchange="onStartDateChange()">
+                                <div id="solarTermContainer" style="display: none;">
+                                        <span id="solarTermText">节气</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="time-picker-container"> <!-- 包裹右侧时间选择区域 -->
+                        <div style="display: flex; align-items: center; gap: 10px; padding: 0 20px;">
+                            <div class="roller-time-picker">
+                                <div class="time-value" id="hourValue" tabindex="0" onmouseenter="focusTimeValue(this)" onmouseleave="blurTimeValue(this)" onwheel="handleTimeWheel(event, 'hour')" onkeydown="handleTimeKeydown(event, 'hour')">00</div>
+                                <div class="time-labels">
+                                    <div class="time-label" onclick="adjustRollerTime('hour', 1)">23</div>
+                                    <div class="time-label current">时</div>
+                                    <div class="time-label" onclick="adjustRollerTime('hour', -1)">01</div>
+                                </div>
+                            </div>
+                            <div class="roller-time-picker">
+                                <div class="time-value" id="minuteValue" tabindex="0" onmouseenter="focusTimeValue(this)" onmouseleave="blurTimeValue(this)" onwheel="handleTimeWheel(event, 'minute')" onkeydown="handleTimeKeydown(event, 'minute')">00</div>
+                                <div class="time-labels">
+                                    <div class="time-label" onclick="adjustRollerTime('minute', 1)">59</div>
+                                    <div class="time-label current">分</div>
+                                    <div class="time-label" onclick="adjustRollerTime('minute', -1)">01</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+</div>                
+            </div>
+            
+            <div class="form-group section">
+                <label class="form-label">执行周期</label>
+                <div class="radio-group horizontal">
+                    <label class="radio-option">
+                        <input type="radio" name="taskCycle" value="once" checked onclick="updateCycleOptions()">
+                        <span>无(仅一次)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="taskCycle" value="daily" onclick="updateCycleOptions()">
+                        <span>每日</span>
+                    </label>
+                    <label class="radio-option" id="weeklyRadioOption">
+                        <input type="radio" name="taskCycle" value="weekly" onclick="updateCycleOptions()">
+                        <span>每周</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="taskCycle" value="monthly" onclick="updateCycleOptions()">
+                        <span>每月</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="taskCycle" value="yearly" onclick="updateCycleOptions()">
+                        <span>每年</span>
+                    </label>
+                </div>
+                
+                <div id="cycleOptions">
+                    <!-- 周期选项将通过JavaScript动态生成 -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <div class="form-group inline">
+                        <div style="flex: 1; display: flex; gap: 20px;">
+                            <label class="checkbox-option">
+                                <input type="checkbox" id="skipHolidays">
+                                <span>跳过节假日</span>
+                            </label>
+                            <label class="checkbox-option">
+                                <input type="checkbox" id="skipWeekdays">
+                                <span>跳过工作日</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group inline" style="margin-top: 15px;">
+                        <label class="form-label" style="font-size: 0.95em;">每次执行重复多次：</label>
+                        <div class="radio-group horizontal" style="flex: 1;">
+                            <label class="radio-option">
+                                <input type="radio" name="taskRepeat" value="none" checked onclick="updateRepeatOptions()">
+                                <span>无</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="taskRepeat" value="interval" onclick="updateRepeatOptions()">
+                                <span>重复间隔</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="repeatOptions" class="sub-form-group" style="display: none;">
+                        <div class="duration-inputs">
+                            <div>
+                                <label class="form-label" style="font-size: 0.85em;">间隔时间</label>
+                                <input type="number" class="form-input" id="repeatInterval" min="1" placeholder="间隔">
+                            </div>
+                            <div>
+                                <label class="form-label" style="font-size: 0.85em;">单位</label>
+                                <select class="form-input" id="repeatUnit">
+                                    <option value="s">秒</option>
+                                    <option value="m">分钟</option>
+                                    <option value="h">小时</option>
+                                    <option value="d">天</option>
+                                    <option value="w">周</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label class="form-label" style="font-size: 0.85em;">持续时间：</label>
+                            <input type="text" class="form-input" id="durationTime" min="0" placeholder="持续时间（`t`次、s秒、m分、h小时、d天、w周）">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group section">
+                <label class="form-label">结束</label>
+                <div class="radio-group horizontal">
+                    <label class="radio-option">
+                        <input type="radio" name="taskEnd" value="none" checked onclick="updateEndOptions()">
+                        <span>无(按周期执行)</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="taskEnd" value="times" onclick="updateEndOptions()">
+                        <span>按次数</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="taskEnd" value="date" onclick="updateEndOptions()">
+                        <span>按日期</span>
+                    </label>
+                </div>
+                
+                <div id="endOptions" class="sub-form-group" style="display: none;">
+                    <div id="endTimesOption" style="display: none;">
+                        <label class="form-label" style="font-size: 0.85em;">执行次数：</label>
+                        <input type="number" class="form-input" id="endTimes" min="1" placeholder="执行次数">
+                    </div>
+                    <div id="endDateOption" style="display: none;">
+                        <label class="form-label" style="font-size: 0.85em;">结束日期：</label>
+                        <input type="date" class="form-input" id="endDate">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="saveTask()">保存</button>
+                <button class="btn btn-secondary" onclick="cancelTask()">取消</button>
+                <button class="btn btn-danger" onclick="deleteTask()">删除</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 全局变量存储任务列表数据
+        let globalTasks = [];
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+        
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        function addNewTask() {
+            // 清空表单
+            document.getElementById('taskName').value = '';
+            document.getElementById('taskStartDate').value = getTodayDate();
+            document.getElementById('endDate').value = getTodayDate();
+            
+            const now = new Date();
+            const hourValue = document.getElementById('hourValue');
+            const minuteValue = document.getElementById('minuteValue');
+          	hourValue.textContent = now.getHours().toString().padStart(2, '0');
+          	minuteValue.textContent = now.getMinutes().toString().padStart(2, '0');
+            
+            // 重置单选按钮
+            document.querySelector('input[name="taskCycle"][value="once"]').checked = true;
+            document.querySelector('input[name="taskRepeat"][value="none"]').checked = true;
+            document.querySelector('input[name="taskEnd"][value="none"]').checked = true;
+            
+            // 更新选项
+            updateCycleOptions();
+            updateRepeatOptions();
+            updateEndOptions();
+            
+            // 取消所有任务项的激活状态
+            document.querySelectorAll('.task-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+        
+        function updateCycleOptions() {
+            const cycleType = document.querySelector('input[name="taskCycle"]:checked').value;
+            const cycleOptions = document.getElementById('cycleOptions');
+            
+            cycleOptions.innerHTML = '';
+            
+            if (cycleType === 'daily') {
+                // 每日 - 显示1~31天的按钮
+                const dayButtons = document.createElement('div');
+                dayButtons.className = 'number-buttons';
+                
+                for (let i = 1; i <= 31; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'number-btn';
+                    button.textContent = i;
+                    button.onclick = function() {
+                        this.classList.toggle('active');
+                    };
+                    dayButtons.appendChild(button);
+                }
+                
+                cycleOptions.appendChild(dayButtons);
+            } else if (cycleType === 'weekly') {
+                // 每周 - 显示一周内1~7天的按钮
+                const weekButtons = document.createElement('div');
+                weekButtons.className = 'number-buttons';
+                
+                for (let i = 1; i <= 7; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'number-btn';
+                    button.textContent = i;
+                    button.onclick = function() {
+                        this.classList.toggle('active');
+                    };
+                    weekButtons.appendChild(button);
+                }
+                
+                cycleOptions.appendChild(weekButtons);
+            } else if (cycleType === 'monthly') {
+                // 每月 - 显示1~12月的按钮
+                const monthButtons = document.createElement('div');
+                monthButtons.className = 'number-buttons';
+                
+                for (let i = 1; i <= 12; i++) {
+                    const button = document.createElement('button');
+                    button.className = 'number-btn';
+                    button.textContent = i;
+                    button.onclick = function() {
+                        this.classList.toggle('active');
+                    };
+                    monthButtons.appendChild(button);
+                }
+                
+                cycleOptions.appendChild(monthButtons);
+            } else if (cycleType === 'yearly') {
+                // 每年 - 显示24节气的勾选框
+                const solarTerms = [
+                    "立春", "雨水", "惊蛰", "春分", "清明", "谷雨", 
+                    "立夏", "小满", "芒种", "夏至", "小暑", "大暑", 
+                    "立秋", "处暑", "白露", "秋分", "寒露", "霜降", 
+                    "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"
+                ];
+                
+                const solarTermContainer = document.createElement('div');
+                solarTermContainer.style.display = 'flex';
+                solarTermContainer.style.flexWrap = 'wrap';
+                solarTermContainer.style.gap = '15px';
+                solarTermContainer.style.marginTop = '10px';
+                
+                solarTerms.forEach((term, index) => {
+                    const termOption = document.createElement('label');
+                    termOption.className = 'checkbox-option';
+                    termOption.style.marginBottom = '0';
+                    termOption.innerHTML = `
+                        <input type="checkbox" name="solarTerm" value="${index + 1}">
+                        <span>${term}</span>
+                    `;
+                    solarTermContainer.appendChild(termOption);
+                });
+                
+                cycleOptions.appendChild(solarTermContainer);
+            }
+        }
+        
+        function adjustRollerTime(type, delta) {
+            if (type === 'hour') {
+                const hourValue = document.getElementById('hourValue');
+                let hour = parseInt(hourValue.textContent) || 0;
+                hour = (hour + delta + 24) % 24;
+                hourValue.textContent = hour.toString().padStart(2, '0');
+            } else if (type === 'minute') {
+                const minuteValue = document.getElementById('minuteValue');
+                let minute = parseInt(minuteValue.textContent) || 0;
+                minute = (minute + delta + 60) % 60;
+                minuteValue.textContent = minute.toString().padStart(2, '0');
+            }
+        }
+
+        // 鼠标进入时聚焦并全选
+        function focusTimeValue(element) {
+            element.focus();
+            // 延迟执行以确保focus生效
+            setTimeout(() => {
+                // 设置用户可选中
+                element.style.userSelect = 'text';
+                // 全选文本
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(element);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }, 10);
+        }
+
+        // 鼠标离开时取消聚焦并取消选中
+        function blurTimeValue(element) {
+            element.blur();
+            element.style.userSelect = 'none';
+            // 清除选区
+            window.getSelection().removeAllRanges();
+            
+            // 失焦时验证并修正值
+            validateTimeValue(element);
+        }
+        
+        // 验证并修正时间值
+        function validateTimeValue(element) {
+            let value = parseInt(element.textContent) || 0;
+            const type = element.id === 'hourValue' ? 'hour' : 'minute';
+            
+            if (type === 'hour') {
+                if (value > 23) value = 23;
+                if (value < 0) value = 0;
+            } else {
+                if (value > 59) value = 59;
+                if (value < 0) value = 0;
+            }
+            
+            element.textContent = value.toString().padStart(2, '0');
+        }
+
+        // 键盘输入处理函数
+        function handleTimeKeydown(event, type) {
+            const element = event.target;
+            const maxValue = type === 'hour' ? 23 : 59;
+            
+            // 允许数字键 0-9
+            if (event.key >= '0' && event.key <= '9') {
+                event.preventDefault();
+                
+                // 获取当前文本
+                let currentText = element.textContent;
+                
+                // 始终将新数字替换整个内容（即替换末位）
+                // 如果当前是 "05"，输入 "1" 变成 "01"，再输入 "5" 变成 "15"
+                // 保持最后一位是新输入的，前面是之前的个位数字
+                let newDigit = event.key;
+                let firstDigit = '0';
+                
+                if (currentText.length >= 1) {
+                	firstDigit = currentText.slice(-2, -1)
+                	// 已有至少一位数字，保留最后一位然后加新数字
+                    currentText = currentText.slice(-1) + newDigit;
+                } else {
+                    currentText = newDigit;
+                }
+                
+                // 即时验证并更新显示
+                let value = parseInt(currentText);
+                if (isNaN(value)) value = 0;
+                if (value > maxValue) {
+                	currentText = firstDigit + newDigit;
+                	value = parseInt(currentText, 10);
+                	if (value > maxValue) value = parseInt(newDigit, 10);
+                }
+                
+                element.textContent = value.toString().padStart(2, '0');
+                
+                // 输入后重新选中文本
+                setTimeout(() => {
+                    const range = document.createRange();
+                    range.selectNodeContents(element);
+                    const selection = window.getSelection();
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }, 0);
+                
+                return;
+            }
+            
+            // 允许的方向键：上增加、下减少
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                adjustRollerTime(type, 1);
+                return;
+            }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                adjustRollerTime(type, -1);
+                return;
+            }
+            
+            // 允许 Backspace 和 Delete
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                return;
+            }
+            
+            // 阻止其他按键
+            event.preventDefault();
+        }
+
+        // 滚轮事件处理函数
+        function handleTimeWheel(event, type) {
+            // 阻止默认滚动行为
+            event.preventDefault();
+            
+            // 检查当前是否处于聚焦状态（光标在元素上）或鼠标是否悬停
+            const element = event.target;
+            const isFocused = document.activeElement === element;
+            const isHovered = element.matches(':hover');
+            
+            // 如果既没有聚焦也没有悬停，不处理滚轮事件
+            if (!isFocused && !isHovered) {
+                return;
+            }
+            
+            // 获得焦点以便后续操作
+            if (!isFocused) {
+                element.focus();
+            }
+            
+            // 判断滚轮滚动方向
+            const delta = event.deltaY > 0 ? -1 : 1;
+            adjustRollerTime(type, delta);
+        }
+        
+        function toggleLunarDate() {
+            const useLunar = document.getElementById('useLunar');
+            const lunarDate = document.getElementById('lunarDate');
+            const weeklyRadioOption = document.getElementById('weeklyRadioOption');
+            
+            if (useLunar.checked) {
+                lunarDate.style.display = 'inline';
+                //weeklyRadioOption.style.display = 'none';
+                weeklyRadioOption.classList.add('disabled'); // 添加.disabled类以改变样式
+        				weeklyRadioOption.style.pointerEvents = 'none'; // 禁止鼠标事件
+        				weeklyRadioOption.querySelector('input').disabled = true; // 禁用内部的单选框
+                
+                // 调用后端API获取农历字串
+                const taskStartDate = document.getElementById('taskStartDate');
+                if (taskStartDate.value) {
+                    const date = new Date(taskStartDate.value);
+                    fetchLunarDate(date);
+                }
+                
+                const weeklyRadio = document.querySelector('input[name="taskCycle"][value="weekly"]');
+                if (weeklyRadio && weeklyRadio.checked) {
+                    document.querySelector('input[name="taskCycle"][value="once"]').checked = true;
+                    updateCycleOptions();
+                }
+            } else {
+                lunarDate.style.display = 'none';
+                //weeklyRadioOption.style.display = 'flex';
+                weeklyRadioOption.classList.remove('disabled'); // 如果您有.disabled类来控制样式
+                weeklyRadioOption.style.pointerEvents = 'auto'; // 允许鼠标事件
+                weeklyRadioOption.querySelector('input').disabled = false; // 启用内部的单选框                
+            }
+        }
+        
+        // 调用后端API获取农历字串
+        function fetchLunarDate(date) {
+            const lunarDate = document.getElementById('lunarDate');
+            const timeStr = date.toISOString();
+            
+            fetch(`/gcron/getlunar?time=${encodeURIComponent(timeStr)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.lunar) {
+                    lunarDate.textContent = data.lunar;
+                }
+            })
+            .catch(error => {
+                console.error('获取农历日期失败:', error);
+                lunarDate.textContent = '获取失败';
+            });
+        }
+        
+        // 根据日期获取节气名称
+        function getSolarTerm(date) {
+            // 节气名称列表（从春分开始）
+            const solarTerms = [
+                "春分", "清明", "谷雨", "立夏", "小满", "芒种",
+                "夏至", "小暑", "大暑", "立秋", "处暑", "白露",
+                "秋分", "寒露", "霜降", "立冬", "小雪", "大雪",
+                "冬至", "小寒", "大寒", "立春", "雨水", "惊蛰"
+            ];
+            // 计算太阳黄经（以度为单位）
+            function calculateSunLongitude(d) {
+                // 儒略日转换（从2000年1月1日12时起算）
+                const baseDate = new Date(Date.UTC(2000, 0, 1, 12, 0, 0));
+                const offset = (d - baseDate) / (1000 * 60 * 60 * 24);
+                
+                // 平黄经计算（使用VSOP87D简化算法）
+                let L = 280.466 + 0.9856474 * offset;
+                L = L % 360 + (L < 0 ? 360 : 0);
+                
+                // 近点角修正
+                const M = 357.529 + 0.9856003 * offset;
+                const M_rad = M * Math.PI / 180;
+                
+                // 中心差修正（开普勒方程近似）
+                const C = (1.915 * Math.sin(M_rad) + 0.02 * Math.sin(2 * M_rad)) * (1 - 0.005 * offset/36525);
+                
+                // 真黄经 = 平黄经 + 中心差
+                return L + C;
+            }
+            // 计算目标日期的太阳黄经
+            const longitude = calculateSunLongitude(date);
+            
+            // 检查是否为节气日期（太阳黄经是否接近15°的整数倍）
+            // 使用较大的误差范围以覆盖节气发生的完整日期
+            const nearestTerm = Math.round(longitude / 15) * 15;
+            if (Math.abs(longitude - nearestTerm) < 0.5) {
+                // 每15°对应一个节气（春分点为0°）
+                const index = Math.floor(nearestTerm / 15) % 24;
+                return solarTerms[index];
+            } else {
+                // 不是节气日期，返回null
+                return null;
+            }
+        }
+        
+        function onStartDateChange() {
+            const taskStartDate = document.getElementById('taskStartDate');
+            const solarTermContainer = document.getElementById('solarTermContainer');
+            const solarTermText = document.getElementById('solarTermText');
+            
+            if (taskStartDate.value) {
+                const date = new Date(taskStartDate.value);
+                const solarTerm = getSolarTerm(date);
+                
+                if (solarTerm) {
+                    solarTermText.textContent = solarTerm;
+                    solarTermContainer.style.display = 'block';
+                } else {
+                    solarTermContainer.style.display = 'none';
+                }
+                
+                // 如果勾选了农历，获取农历字串
+                const useLunar = document.getElementById('useLunar');
+                if (useLunar.checked) {
+                    fetchLunarDate(date);
+                }
+            } else {
+                solarTermContainer.style.display = 'none';
+            }
+        }
+        
+        function updateRepeatOptions() {
+            const repeatType = document.querySelector('input[name="taskRepeat"]:checked').value;
+            const repeatOptions = document.getElementById('repeatOptions');
+            
+            repeatOptions.style.display = repeatType === 'interval' ? 'block' : 'none';
+        }
+        
+        function updateEndOptions() {
+            const endType = document.querySelector('input[name="taskEnd"]:checked').value;
+            const endOptions = document.getElementById('endOptions');
+            const endTimesOption = document.getElementById('endTimesOption');
+            const endDateOption = document.getElementById('endDateOption');
+            
+            endOptions.style.display = endType !== 'none' ? 'block' : 'none';
+            endTimesOption.style.display = endType === 'times' ? 'block' : 'none';
+            endDateOption.style.display = endType === 'date' ? 'block' : 'none';
+        }
+        
+        function saveTask() {
+            // 构建任务数据
+            const taskData = {
+                name: document.getElementById('taskName').value.trim(),
+                start_time: getStartTime(),
+                lunar: document.getElementById('useLunar').checked ? document.getElementById('lunarDate').textContent : '',
+                job_cycle: getJobCycle(),
+                cycle_details: getCycleDetails(),
+                skip_holidays: document.getElementById('skipHolidays').checked,
+                skip_weekdays: document.getElementById('skipWeekdays').checked,
+                job_repeat: document.querySelector('input[name="taskRepeat"][value="interval"]').checked,
+                repeat_interval: getRepeatInterval(),
+                repeat_duration: getRepeatDuration(),
+                job_end: getJobEnd(),
+                end_count: parseInt(document.getElementById('endTimes').value) || 0,
+                end_date: document.getElementById('endDate').value ? new Date(document.getElementById('endDate').value).toISOString() : new Date().toISOString()
+            };
+            
+            // 获取当前选中的任务文件名
+            const currentTask = document.querySelector('.task-item.active');
+            const filename = currentTask ? currentTask.dataset.filename : '';
+            if (filename) {
+                taskData.filename = filename;
+                // 获取全局任务数据中的is_active状态
+                const taskIndex = globalTasks.findIndex(task => task.filename === filename);
+                if (taskIndex !== -1) {
+                    taskData.is_active = globalTasks[taskIndex].is_active;
+                }
+            }
+            
+            // 发送保存请求
+            fetch('/gcron/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.filename) {
+                    alert('保存成功');
+                    // 更新任务列表并定位到当前任务
+                    loadTasks(data.filename);
+                } else {
+                    alert('保存失败');
+                }
+            })
+            .catch(error => {
+                console.error('保存任务失败:', error);
+                alert('保存失败，请重试');
+            });
+        }
+        
+        function cancelTask() {
+            // 重新选中当前任务
+            const currentTask = document.querySelector('.task-item.active');
+            if (currentTask) {
+                const filename = currentTask.dataset.filename;
+                selectTaskByFilename(filename);
+            }
+        }
+        
+        function deleteTask() {
+            const currentTask = document.querySelector('.task-item.active');
+            if (!currentTask) {
+                alert('请先选择要删除的任务');
+                return;
+            }
+            
+            if (confirm('确定要删除这个任务吗？')) {
+                const filename = currentTask.dataset.filename;
+                
+                fetch(`/gcron/delete?filename=${encodeURIComponent(filename)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('删除成功');
+                        loadTasks();
+                    } else {
+                        alert('删除失败');
+                    }
+                })
+                .catch(error => {
+                    console.error('删除任务失败:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 加载任务列表
+        function loadTasks(id) {
+            fetch('/gcron/list')
+            .then(response => response.json())
+            .then(tasks => {
+                globalTasks = tasks; // 存储任务数据到全局变量
+                
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+                
+                tasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = 'task-item';
+                    taskItem.dataset.filename = task.filename;
+                    taskItem.onclick = () => selectTaskByFilename(task.filename);
+                    
+                    const startTime = new Date(task.start_time);
+                    const formattedStartTime = formatDate(startTime);
+                    const formattedTime = `${startTime.getHours().toString().padStart(2, '0')}:${startTime.getMinutes().toString().padStart(2, '0')}`;
+                    
+                    // 计算下次执行时间（简化处理）
+                    const nextExecution = formatNextExecution(task);
+                    
+                    taskItem.innerHTML = `
+                        <div class="task-item-header">
+                            <span class="task-start-date">${formattedStartTime}</span>
+                            <span class="task-next-execution">${nextExecution}</span>
+                        </div>
+                        <div class="task-item-content">
+                            <span class="task-time-name">${formattedTime} ${task.name}</span>
+                            <div class="task-toggle">
+                                <span>${task.is_active ? '开' : '关'}</span>
+                                <label class="task-toggle-switch">
+                                    <input type="checkbox" ${task.is_active ? 'checked' : ''} onchange="toggleTaskActive('${task.filename}', this, this.closest('.task-item').querySelector('.task-next-execution'))">
+                                    <span class="task-toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="task-cycle">${task.description}</div>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                });
+            })
+            .catch(error => {
+                // 显示加载失败提示
+                //alert('加载任务列表失败，显示示例数据');
+            })
+            .finally(() => {
+                if (id) {
+                    selectTaskByFilename(id);
+                }
+                toggleNextTime();
+            });
+        }
+        
+        // 根据文件名选择任务
+        function selectTaskByFilename(filename) {
+            // 激活选中的任务项
+            document.querySelectorAll('.task-item').forEach(item => {
+                if (item.dataset.filename === filename) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            
+            // 从全局变量中获取任务详情
+            const task = globalTasks.find(task => task.filename === filename);
+            if (task) {
+                // 填充表单数据
+                populateTaskForm(task);
+            } else {
+                console.error('任务详情未找到:', filename);
+                alert('任务详情未找到');
+            }
+        }
+        
+        // 填充任务表单
+        function populateTaskForm(task) {
+            // 填充基本信息
+            document.getElementById('taskName').value = task.name;
+            
+            // 填充开始时间
+            const startTime = new Date(task.start_time);
+            document.getElementById('taskStartDate').value = formatDate(startTime);
+            document.getElementById('hourValue').textContent = startTime.getHours().toString().padStart(2, '0');
+            document.getElementById('minuteValue').textContent = startTime.getMinutes().toString().padStart(2, '0');
+            
+            // 填充农历选项
+            if (task.lunar) {
+                document.getElementById('useLunar').checked = true;
+            } else {
+                document.getElementById('useLunar').checked = false;
+            }
+            toggleLunarDate();
+            
+            // 填充执行周期
+            setJobCycle(task.job_cycle);
+            updateCycleOptions();
+            setCycleDetails(task.cycle_details);
+            
+            // 填充跳过选项
+            document.getElementById('skipHolidays').checked = task.skip_holidays;
+            document.getElementById('skipWeekdays').checked = task.skip_weekdays;
+            
+            // 填充重复选项
+            if (task.job_repeat) {
+                document.querySelector('input[name="taskRepeat"][value="interval"]').checked = true;
+                // 提取时间单位（最后一位字符）
+                const unit = task.repeat_interval.slice(-1);  // 获取最后一个字符 's'
+                // 提取数字部分（除最后一位外的子串）
+                const intervalValue = task.repeat_interval.slice(0, -1);  // 获取 '3'
+                document.getElementById('repeatInterval').value = intervalValue;
+                document.getElementById('repeatUnit').value = unit;
+                document.getElementById('durationTime').value = task.repeat_duration;
+            } else {
+                document.querySelector('input[name="taskRepeat"][value="none"]').checked = true;
+            }
+            updateRepeatOptions();
+            
+            // 填充结束选项
+            setJobEnd(task.job_end);
+            updateEndOptions();
+            document.getElementById('endTimes').value = task.end_count || '';
+            if (task.end_date) {
+                document.getElementById('endDate').value = formatDate(new Date(task.end_date));
+            }
+        }
+        
+        // 辅助函数：获取开始时间
+        function getStartTime() {
+            const date = document.getElementById('taskStartDate').value;
+            const hour = document.getElementById('hourValue').textContent;
+            const minute = document.getElementById('minuteValue').textContent;
+            return new Date(`${date} ${hour}:${minute}`).toISOString();
+        }
+        
+        // 辅助函数：获取任务周期
+        function getJobCycle() {
+            const cycle = document.querySelector('input[name="taskCycle"]:checked').value;
+            switch (cycle) {
+                case 'once': return 0;
+                case 'daily': return 1;
+                case 'weekly': return 2;
+                case 'monthly': return 3;
+                case 'yearly': return -1;
+                default: return 0;
+            }
+        }
+        
+        // 辅助函数：设置任务周期
+        function setJobCycle(cycle) {
+            let cycleValue = 'once';
+            switch (cycle) {
+                case 0: cycleValue = 'once'; break;
+                case 1: cycleValue = 'daily'; break;
+                case 2: cycleValue = 'weekly'; break;
+                case 3: cycleValue = 'monthly'; break;
+                case -1: cycleValue = 'yearly'; break;
+            }
+            document.querySelector(`input[name="taskCycle"][value="${cycleValue}"]`).checked = true;
+        }
+        
+        // 辅助函数：获取周期详情
+        function getCycleDetails() {
+            const cycle = document.querySelector('input[name="taskCycle"]:checked').value;
+            const details = [];
+            
+            // 获取选中的节气
+            if (cycle === 'yearly') {
+                const solarTerms = document.querySelectorAll('input[name="solarTerm"]:checked');
+                solarTerms.forEach(term => {
+                  details.push(parseInt(term.value));
+                });
+            } else {
+              // 获取选中的按钮
+              const buttons = document.querySelectorAll('.number-btn.active');
+              buttons.forEach(button => {
+                  details.push(parseInt(button.textContent));
+              });
+            }
+            
+            return details;
+        }
+        
+        // 辅助函数：设置周期详情
+        function setCycleDetails(details) {
+            const cycle = document.querySelector('input[name="taskCycle"]:checked').value;
+
+            if (cycle === 'yearly') {
+                // 1. 清除所有节气复选框的选中状态
+                document.querySelectorAll('input[name="solarTerm"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            
+                // 2. 根据传入的 details 数组设置选中状态
+                details.forEach(value => {
+                    const selector = `input[name="solarTerm"][value="${value}"]`;
+                    const checkbox = document.querySelector(selector);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+            } else {
+                // 清空所有按钮的激活状态
+                document.querySelectorAll('.number-btn').forEach(button => {
+                    button.classList.remove('active');
+                });
+                
+                // 激活选中的按钮
+                details.forEach(value => {
+                    const button = document.querySelector(`.number-btn:nth-child(${value})`);
+                    if (button) {
+                        button.classList.add('active');
+                    }
+                });
+            }
+        }
+        
+        // 辅助函数：获取重复间隔
+        function getRepeatInterval() {
+            const interval = document.getElementById('repeatInterval').value;
+            const unit = document.getElementById('repeatUnit').value;
+            return `${interval}${unit}`;
+        }
+        
+        // 辅助函数：获取重复持续时间
+        function getRepeatDuration() {
+            return document.getElementById('durationTime').value || '0';
+        }
+        
+        // 辅助函数：获取结束类型
+        function getJobEnd() {
+            const endType = document.querySelector('input[name="taskEnd"]:checked').value;
+            switch (endType) {
+                case 'none': return 0;
+                case 'times': return 1;
+                case 'date': return 2;
+                default: return 0;
+            }
+        }
+        
+        // 辅助函数：设置结束类型
+        function setJobEnd(endType) {
+            let endValue = 'none';
+            switch (endType) {
+                case 0: endValue = 'none'; break;
+                case 1: endValue = 'times'; break;
+                case 2: endValue = 'date'; break;
+            }
+            document.querySelector(`input[name="taskEnd"][value="${endValue}"]`).checked = true;
+        }
+        
+        // 辅助函数：格式化日期
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 辅助函数：格式化日期时间
+        function formatDateTime(date) {
+            return `${formatDate(date)} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+        }
+        
+        // 辅助函数：计算下次执行时间
+        function formatNextExecution(task) {
+            if (!task?.next) return "N/A"; // 处理空值
+            try {
+                const timestr = formatDateTime(new Date(task.next));
+                return (timestr > '2') ? timestr : '---';
+            } catch (e) {
+                console.error(`Format failed: ${e.message}`, task.next);
+                return "---";
+            }
+        }
+        
+        // 获取下次执行时间显示
+        function toggleNextTime(taskIndex, nextExecution) {
+            const filename = globalTasks[taskIndex]?.filename ?? '';
+            fetch(`/gcron/getnexttime?filename=${encodeURIComponent(filename)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.alarm_time>'2'){
+                  document.getElementById('alarmTime').textContent = formatDateTime(new Date(data.alarm_time));
+                } else {
+                  document.getElementById('alarmTime').textContent = '--:--';
+                }
+                // 根据后端返回的状态更新UI
+                if (taskIndex) {
+                  globalTasks[taskIndex].next = data.next; 
+                  if (nextExecution) {
+                    nextExecution.textContent = formatNextExecution(globalTasks[taskIndex]);
+                  }
+                }
+            })
+            .catch(error => {
+                console.error('获取下次执行时间失败:', error);
+            });
+        }
+
+        // 切换任务激活状态
+        function toggleTaskActive(filename, checkbox, nextExecution) {
+            const active = checkbox.checked ? '1' : '0';
+            const toggleSpan = checkbox.closest('.task-toggle').querySelector('span');
+            
+            // 调用后端API设置任务激活状态
+            fetch(`/gcron/setactive?filename=${encodeURIComponent(filename)}&active=${active}`)
+            .then(response => response.json())
+            .then(data => {
+                // 根据后端返回的状态更新UI
+                const isActive = data.is_active === 1;
+                checkbox.checked = isActive;
+                toggleSpan.textContent = isActive ? '开' : '关';
+                
+                // 更新全局任务数据中的is_active状态
+                const taskIndex = globalTasks.findIndex(task => task.filename === filename);
+                if (taskIndex !== -1) {
+                    globalTasks[taskIndex].is_active = isActive;
+                    globalTasks[taskIndex].next = ''; 
+                    //同步下次时间
+                    toggleNextTime(taskIndex, nextExecution)
+                }
+            })
+            .catch(error => {
+                console.error('设置任务激活状态失败:', error);
+                // 恢复原来的状态
+                checkbox.checked = !checkbox.checked;
+                toggleSpan.textContent = checkbox.checked ? '开' : '关';
+            });
+        }
+        
+        // 检查并打开脚本编辑器
+        function checkAndOpenScriptEditor() {
+            // 获取当前选中任务的filename
+            const activeTaskItem = document.querySelector('.task-item.active');
+            if (activeTaskItem) {
+                const filename = activeTaskItem.dataset.filename;
+                if (filename) {
+                    // 如果filename不为空，跳转到脚本编辑器页面
+                    window.location.href = `script_editor.html?filename=${encodeURIComponent(filename)}`;
+                } else {
+                    alert('当前任务缺少文件名，无法编辑脚本');
+                }
+            } else {
+                alert('请先选择一个任务');
+            }
+        }
+
+        // 初始化
+        function init() {
+            document.getElementById('taskStartDate').value = getTodayDate();
+            document.getElementById('endDate').value = getTodayDate();
+            updateCycleOptions();
+            updateRepeatOptions();
+            updateEndOptions();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            currentFilename = urlParams.get('filename');
+            loadTasks(currentFilename); // 加载任务列表
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = init;
+
+    </script>
+</body>
+</html>

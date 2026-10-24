@@ -1,0 +1,393 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #e9ecef;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.chat-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    margin-top: 10px;
+    backdrop-filter: blur(80px);
+}
+
+.messages {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    font-size: 16px;
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.message img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.message-content {
+    padding: 12px 16px;
+    border-radius: 12px;
+    max-width: 85%;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.message-content .title {
+    font-size: 1.3em;
+    font-weight: bold;
+    display: block;
+    margin: 16px 0 12px 0;
+    color: #333;
+}
+
+.message.user {
+    flex-direction: row-reverse;
+}
+
+.message.user img {
+    margin-left: 10px;
+    margin-right: 0;
+}
+
+.message.user .message-content {
+    background-color: #007bff;
+    backdrop-filter: blur(80px);
+    color: white;
+    text-align: right;
+}
+
+.message.bot .message-content {
+    background-color: #f1f3f5;
+}
+
+.input-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.input-container input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.input-container button {
+    padding: 10px 15px;
+    min-width: 60px;
+    white-space: nowrap;
+    background-color: #007bff;
+    backdrop-filter: blur(80px);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.input-container button:hover {
+    background-color: #0056b3;
+    backdrop-filter: blur(80px);
+}
+
+/* Media query for small screens */
+@media (max-width: 600px) {
+    .chat-container {
+        height: 83vh;
+        padding: 15px;
+    }
+
+    .messages {
+        padding: 20px;
+        font-size: 15px;
+    }
+
+    .input-container {
+        gap: 8px;
+    }
+
+    .input-container input {
+        font-size: 14px;
+    }
+
+    .input-container button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .message img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .message-content {
+        font-size: 15px;
+        max-width: 100%;
+    }
+}
+
+/* 添加下拉菜单样式 */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background-color: #fff;
+    min-width: 160px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 1;
+    margin-bottom: 10px;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+.dropdown-item {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* 深色模式样式 */
+body.dark-mode {
+    background-color: #1a1a1a;
+}
+
+.dark-mode .chat-container {
+    background-color: #2d2d2d;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(80px);
+}
+
+.dark-mode .messages {
+    background-color: #383838;
+    border-color: #444;
+    color: #fff;
+    backdrop-filter: blur(80px);
+}
+
+.dark-mode .message.bot .message-content {
+    background-color: #444;
+    color: #fff;
+}
+
+.dark-mode .message.user .message-content {
+    background-color: #0056b3;
+    backdrop-filter: blur(80px);
+}
+
+.dark-mode .input-container input {
+    background-color: #383838;
+    border-color: #444;
+    color: #fff;
+}
+
+.dark-mode .dropdown-content {
+    background-color: #2d2d2d;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .dropdown-item {
+    color: #fff;
+}
+
+.dark-mode .dropdown-item:hover {
+    background-color: #383838;
+}
+
+/* 段落样式 */
+.message-content p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.dark-mode .message-content p {
+    color: #fff;
+}
+
+/* 调整标题和段落样式 */
+.message-content .title {
+    font-size: 1.3em;
+    font-weight: bold;
+    display: block;
+    margin: 16px 0 12px 0;
+    color: #333;
+}
+
+.message-content p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.dark-mode .message-content .title {
+    color: #fff;
+}
+
+/* 粗体文本样式 */
+.message-content .bold-text {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #333;
+}
+
+/* 段落标题样式 */
+.message-content .section-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin: 16px 0 8px 0;
+}
+
+/* 子段落样式 */
+.message-content .subsection {
+    margin: 8px 0 8px 20px;
+}
+
+/* 正文样式 */
+.message-content .subtitle {
+    font-weight: bold;
+}
+
+/* 深色模式适配 */
+.dark-mode .message-content .bold-text,
+.dark-mode .message-content .section-title,
+.dark-mode .message-content .subtitle,
+.dark-mode .message-content p {
+    color: #fff;
+}
+
+.loading {
+    text-align: center;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* 为复选框和标签添加样式 */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.dropdown-item input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+.dropdown-item label {
+    cursor: pointer;
+}
+
+/* 菜单样式 */
+.menu-container {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    z-index: 50;
+}
+
+.menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+    background-color: #f3f4f6;
+}
+
+.menu-btn i {
+    color: #374151;
+    font-size: 24px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    width: 192px;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: all 0.2s ease;
+    z-index: 50;
+}
+
+.dropdown-menu.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.menu-items {
+    padding: 8px 0;
+}
+
+.menu-item {
+    display: block;
+    padding: 8px 16px;
+    color: #374151;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.menu-item:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.menu-item i {
+    margin-right: 8px;
+}

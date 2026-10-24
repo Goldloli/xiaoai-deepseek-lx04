@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>脚本编辑</title>
+    <!-- 引入Font Awesome图标库 -->
+    <link href="./assets_files/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入CodeMirror库 -->
+    <link rel="stylesheet" href="./assets_files/codemirror.min.css">
+    <link rel="stylesheet" href="./assets_files/dracula.min.css">
+    <script src="./assets_files/codemirror.min.js"></script>
+    <script src="./assets_files/javascript.min.js"></script>
+    <script src="./assets_files/matchbrackets.min.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+        
+        #scriptQuestion {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #scriptQuestion:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .editor-container {
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+            height: 400px;
+        }
+        
+        .editor-container:focus-within {
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        /* CodeMirror 编辑器样式 */
+        #editorWrapper {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .CodeMirror {
+            width: 100%;
+            height: 100%;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border-radius: 4px;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        #testBtn {
+            background-color: #2ecc71;
+        }
+        
+        #testBtn:hover {
+            background-color: #27ae60;
+        }
+        
+        #backBtn {
+            background-color: #f44336;
+        }
+        
+        #backBtn:hover {
+            background-color: #d32f2f;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        button i {
+            font-size: 18px;
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+            display: block;
+        }
+        
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .CodeMirror {
+                min-height: 300px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>脚本编辑</h1>
+        </header>
+        
+        <form id="jsForm">
+            <div class="form-group">
+                <label for="scriptQuestion">脚本文件:</label>
+                <input type="text" id="scriptQuestion" placeholder="脚本文件名称..." readonly/>
+            </div>
+            
+            <div class="form-group">
+                <label for="scriptEditor">JavaScript脚本</label>
+                <div class="editor-container">
+                    <div id="editorWrapper"></div>
+                    <!-- 隐藏的textarea用于表单数据处理 -->
+                    <textarea id="scriptEditor" style="display: none;" placeholder="在这里编写JavaScript代码..."></textarea>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <!-- 测试按钮 -->
+                <button type="button" id="testBtn">
+                    <i class="fa fa-play"></i> 测试脚本
+                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button type="submit" id="saveBtn">
+                        <i class="fa fa-save"></i> 保存脚本
+                    </button>
+                    <button type="button" id="backBtn" onclick="Back()">
+                        <i class="fa fa-arrow-left"></i> 返回
+                    </button>
+                </div>
+            </div>
+            
+            <div id="statusMessage" class="status-message"></div>
+        </form>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const questionInput = document.getElementById('scriptQuestion');
+        const jsEditorTextarea = document.getElementById('scriptEditor');
+        const saveBtn = document.getElementById('saveBtn');
+        const testBtn = document.getElementById('testBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const jsForm = document.getElementById('jsForm');
+        let codeMirrorEditor;
+        let currentFilename;
+        let filename;
+        
+        // 页面加载时初始化编辑器并从后台加载数据
+        document.addEventListener('DOMContentLoaded', () => {
+            // 获取URL中的filename参数
+            const urlParams = new URLSearchParams(window.location.search);
+            currentFilename = urlParams.get('filename');
+            filename = currentFilename.replace(/\.[^/.]+$/, "") + ".job";
+            
+            questionInput.value = filename;
+            // 初始化CodeMirror编辑器
+            initEditor();
+            // 加载脚本数据
+            loadScriptData();
+        });
+        
+        function Back() {
+            window.location.href = `schedule?filename=${encodeURIComponent(currentFilename)}`;
+        }
+        
+        // 初始化CodeMirror编辑器
+        function initEditor() {
+            codeMirrorEditor = CodeMirror(document.getElementById('editorWrapper'), {
+                mode: "javascript", // 设置JavaScript模式
+                theme: "dracula",   // 设置主题
+                lineNumbers: true,  // 显示行号
+                lineWrapping: true, // 自动换行
+                matchBrackets: true, // 匹配括号
+                indentUnit: 4,      // 缩进单位
+                smartIndent: true,  // 智能缩进
+                tabSize: 4,         // Tab键大小
+                placeholder: "在这里编写JavaScript代码...",
+                lineWiseCopyCut: true,
+                autoCloseBrackets: true,
+                viewportMargin: Infinity
+            });
+            
+            // 同步编辑器内容到隐藏的textarea
+            codeMirrorEditor.on('change', () => {
+                jsEditorTextarea.value = codeMirrorEditor.getValue();
+            });
+        }
+        
+        // 加载脚本数据
+        async function loadScriptData() {
+            // 这里可以从后端加载脚本数据
+            // 目前使用默认示例脚本
+            const defaultScript = `// 任务执行脚本示例
+function executeTask() {
+    console.log('任务执行中...');
+    // 在这里编写任务执行逻辑
+    return true;
+}
+
+executeTask();`;
+            
+            try {
+                const response = await fetch(`/schedule/script?filename=${encodeURIComponent(filename)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'text/plain; charset=utf-8'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('加载数据失败');
+                }
+                
+                const data = await response.text();
+                if (data==='') {
+                    throw new Error('加载示例数据');
+                }
+                
+                // 将加载的数据填充到编辑器中
+                codeMirrorEditor.setValue(data);
+                jsEditorTextarea.value = data;
+                
+            } catch (error) {
+                console.error('加载数据时出错:', error);
+                codeMirrorEditor.setValue(defaultScript);
+                jsEditorTextarea.value = defaultScript;
+            }
+
+        }
+        
+        // 测试脚本
+        function testScript() {
+            const question = questionInput.value.trim();
+            const scriptContent = codeMirrorEditor.getValue().trim();
+            
+            if (!scriptContent) {
+                showStatusMessage('脚本不能为空', 'error');
+                return;
+            }
+            
+            // 禁用测试按钮，防止重复执行
+            testBtn.disabled = true;
+            testBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 测试中...';
+            
+            // 模拟测试执行
+            setTimeout(() => {
+                try {
+                    // 执行脚本
+                    fetch(`/schedule/test?filename=${encodeURIComponent(filename)}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'text/plain; charset=utf-8'
+                        },
+                        body: scriptContent
+                    })
+                    .then(response => {
+                      if (!response.ok) {
+                        return response.text().then(errorMessage => {
+                          throw new Error(errorMessage);
+                        });
+    
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                      }
+                      return response.text();
+                    });
+                
+                    //eval(scriptContent);
+                    showStatusMessage('测试执行成功!', 'success');
+                } catch (error) {
+                    showStatusMessage(`测试执行出错: ${error.message}`, 'error');
+                }
+                
+                // 恢复按钮状态
+                testBtn.disabled = false;
+                testBtn.innerHTML = '<i class="fa fa-play"></i> 测试脚本';
+            }, 500);
+        }
+        
+        // 保存脚本
+        async function saveScript() {
+            const scriptContent = codeMirrorEditor.getValue().trim();
+            
+            if (!scriptContent) {
+                showStatusMessage('脚本不能为空', 'error');
+                return;
+            }
+            
+            // 禁用保存按钮，防止重复提交
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 保存中...';
+            
+            try {
+                const response = await fetch(`/schedule/save?filename=${encodeURIComponent(filename)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain; charset=utf-8'
+                    },
+                    body: scriptContent
+                });
+                if (!response.ok) {
+                    throw new Error('保存数据失败');
+                }
+                
+                showStatusMessage('脚本保存成功', 'success');
+                
+            } catch (error) {
+                console.error('保存数据时出错:', error);
+            }
+            
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa fa-save"></i> 保存脚本';
+        }
+        
+        // 表单提交事件处理（保存）
+        jsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveScript();
+        });
+        
+        // 测试按钮点击事件
+        testBtn.addEventListener('click', testScript);
+        
+        // 显示状态消息
+        function showStatusMessage(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message';
+            statusMessage.classList.add(type);
+            
+            // 5秒后自动隐藏消息
+            setTimeout(() => {
+                statusMessage.classList.remove(type);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

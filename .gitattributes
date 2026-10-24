@@ -1,0 +1,6 @@
+*.md text eol=lf
+*.py text eol=lf
+*.sh text eol=lf
+*.go text eol=lf
+*.json text eol=lf
+*.patch -text -whitespace

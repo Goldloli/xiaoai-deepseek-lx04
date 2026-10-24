@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小爱Chat</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 悬浮菜单按钮 -->
+    <div class="menu-container">
+        <button id="menuBtn" class="menu-btn">
+            <i class="fa fa-bars"></i>
+        </button>
+        
+        <!-- 下拉菜单 -->
+        <div id="dropdownMenu" class="dropdown-menu">
+            <div class="menu-items">
+                <a href="/" class="menu-item">
+                    <i class="fa fa-comments-o"></i>小爱Chat
+                </a>
+                <a href="/player" class="menu-item">
+                    <i class="fa fa-music"></i>音乐播放
+                </a>
+                <a href="/config" class="menu-item">
+                    <i class="fa fa-cog"></i>XiaoBot配置
+                </a>
+                <a href="/query" class="menu-item">
+                    <i class="fa fa-cog"></i>提问内容执行脚本
+                </a>
+                <a href="/task" class="menu-item">
+                    <i class="fa fa-cog"></i>接收任务执行脚本
+                </a>
+                <a href="/schedule" class="menu-item">
+                    <i class="fa fa-cog"></i>定时任务设置
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="chat-container">
+        <div class="messages" id="messages"></div>
+        <div id="loading" class="loading" style="display: none;">加载中...</div>
+        <div class="input-container">
+            <input id="chat-input" type="text" placeholder="输入消息..." />
+            <button onclick="sendMessage()">发送</button>
+            <div class="dropdown">
+                <button onclick="toggleDropdown(event)">更多</button>
+                <div class="dropdown-content" id="dropdownMore">
+                    <div class="dropdown-item">
+                        <input type="checkbox" id="playQuery" unchecked>
+                        <label for="playQuery">播放问题</label>
+                    </div>
+                    <div class="dropdown-item">
+                        <input type="checkbox" id="playAnswer" checked>
+                        <label for="playAnswer">播放回答</label>
+                    </div>
+                    <div class="dropdown-item" onclick="toggleTheme()">
+                        <span>　 浅色/深色</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

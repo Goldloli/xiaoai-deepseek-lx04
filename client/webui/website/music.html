@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐播放</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e9ecef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .music-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            height: 80vh;
+            gap: 20px;
+        }
+
+        .player-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .music-list-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .current-song-info {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .current-song-info h2 {
+            margin: 10px 0;
+            font-size: 1.5em;
+        }
+
+        .current-song-info p {
+            color: #666;
+            margin: 5px 0;
+        }
+
+        .album-art {
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        .control-btn.play {
+            width: 70px;
+            height: 70px;
+            font-size: 1.5em;
+        }
+
+        .play-mode {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .mode-title {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .mode-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .mode-option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.2s;
+        }
+
+        .mode-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .mode-option input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .mode-option input[type="radio"]:checked + span {
+            color: #007bff;
+            font-weight: 600;
+        }
+
+        .auto-play-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .auto-btn {
+            padding: 8px 15px;
+            border: 2px solid #007bff;
+            background-color: white;
+            color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .auto-btn:hover {
+            background-color: #e3f2fd;
+            color: #0056b3;
+        }
+
+        .auto-btn.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .auto-btn.active:hover {
+            background-color: #0056b3;
+            color: white;
+        }
+
+        .auto-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .music-list.disabled .music-item {
+            pointer-events: none;
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .music-list.disabled .music-item:hover {
+            background-color: white;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: auto;
+        }
+
+        .volume-control input[type="range"] {
+            flex: 1;
+        }
+        
+        .breadcrumb {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        /* 禁用状态的面包屑样式 */
+        .breadcrumb.disabled {
+            pointer-events: none; /* 核心：阻止所有点击事件 */
+            opacity: 0.6; /* 视觉上变灰，体现禁用 */
+            cursor: not-allowed; /* 鼠标指针提示禁用 */
+        }
+        /* 可选：如果需要单独控制子元素样式 */
+        .breadcrumb.disabled .breadcrumb-item {
+            color: #999; /* 文字变灰 */
+        }
+
+        .breadcrumb-item {
+            cursor: pointer;
+            color: #007bff;
+        }
+
+        .breadcrumb-item:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            color: #666;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 5px;
+            padding: 8px 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+
+        .search-box i {
+            color: #666;
+            margin-right: 8px;
+        }
+
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+        }
+
+        .search-box input::placeholder {
+            color: #999;
+        }
+
+        .music-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .music-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .music-item:hover {
+            background-color: #e9ecef;
+        }
+
+        .music-item.active {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .music-item .icon {
+            margin-right: 10px;
+            font-size: 1.1em;
+        }
+
+        .music-item .info {
+            flex: 1;
+        }
+
+        .music-item .info h4 {
+            margin: 0;
+            font-size: 0.95em;
+        }
+
+        .music-item .favorite-btn {
+            margin-left: 10px;
+            color: #ccc;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: color 0.2s;
+        }
+
+        .music-item .favorite-btn:hover {
+            color: #ffc107;
+        }
+
+        .music-item .favorite-btn.favorited {
+            color: #ffc107;
+        }
+
+        .music-item.folder .icon {
+            color: #ffc107;
+        }
+
+        .music-item.folder .info h4 {
+            font-weight: 600;
+        }
+
+        .back-btn {
+            margin-bottom: 15px;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .dark-mode .music-container {
+            background-color: #2d2d2d;
+        }
+
+        .dark-mode .player-section,
+        .dark-mode .music-list-section {
+            background-color: #3d3d3d;
+        }
+
+        .dark-mode .music-item {
+            background-color: #4d4d4d;
+        }
+
+        .dark-mode .music-item:hover {
+            background-color: #5d5d5d;
+        }
+
+        .dark-mode .breadcrumb {
+            background-color: #4d4d4d;
+        }
+
+        .dark-mode .search-box {
+            background-color: #4d4d4d;
+            border-color: #555;
+        }
+
+        .dark-mode .search-box input {
+            color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .music-container {
+                flex-direction: column;
+                height: auto;
+                min-height: 80vh;
+            }
+
+            .player-section,
+            .music-list-section {
+                min-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="music-container">
+        <div class="player-section">
+            <button class="back-btn" onclick="goBack()">
+                <i class="fa fa-arrow-left"></i>返回
+            </button>
+
+            <div class="current-song-info">
+                <div class="album-art" id="albumArt">
+                    <i class="fa fa-music"></i>
+                </div>
+                <h2 id="currentSongName">未选择音乐</h2>
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" onclick="playPrevious()" title="上一首">
+                    <i class="fa fa-step-backward"></i>
+                </button>
+                <button class="control-btn play" id="stopBtn" onclick="stopMusic()" title="停止">
+                    <i class="fa fa-stop"></i>
+                </button>
+                <button class="control-btn" onclick="playNext()" title="下一首">
+                    <i class="fa fa-step-forward"></i>
+                </button>
+            </div>
+
+            <div class="play-mode">
+                <div class="mode-title">播放模式</div>
+                <div class="mode-options">
+                    <label class="mode-option">
+                        <input type="radio" name="playMode" value="single" checked onclick="setPlayMode('single')">
+                        <span>单次播放</span>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="playMode" value="loop" onclick="setPlayMode('loop')">
+                        <span>循环播放</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="auto-play-controls">
+                <button class="auto-btn" id="sequenceBtn" onclick="toggleSequencePlay()" title="顺序播放">
+                    <i class="fa fa-list-ol"></i> 顺序播放
+                </button>
+                <button class="auto-btn" id="randomBtn" onclick="toggleRandomPlay()" title="随机播放">
+                    <i class="fa fa-random"></i> 随机播放
+                </button>
+            </div>
+
+            <div class="volume-control">
+                <i class="fa fa-volume-up"></i>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50" onchange="setVolume(this.value)">
+                <span id="volumeValue">70%</span>
+            </div>
+        </div>
+
+        <div class="music-list-section">
+            <h3>音乐列表</h3>
+            <div class="search-box">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" placeholder="搜索音乐..." oninput="filterMusicList()">
+            </div>
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div class="music-list" id="musicList"></div>
+        </div>
+    </div>
+
+    <script src="music.js"></script>
+</body>
+</html>

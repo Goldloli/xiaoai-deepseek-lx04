@@ -1,0 +1,16 @@
+{
+  "hardware": "LX04",
+  "use_command": true,
+  "mute_xiaoai": true,
+  "bot": "chatgptapi",
+  "api_base": "https://api.deepseek.com",
+  "keyword": [
+    "请问"
+  ],
+  "stream": false,
+  "tts": "mi",
+  "prompt": "请用中文口语回答，通常控制在150字以内，不使用Markdown表格。没有实时资料时，不要编造天气、新闻或设备状态。",
+  "gpt_options": {
+    "model": "deepseek-flash"
+  }
+}

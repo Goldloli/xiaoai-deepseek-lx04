@@ -1,0 +1,13 @@
+name: 改进建议 / Feature request
+description: 描述使用场景、期望行为与适配依据
+body:
+  - type: textarea
+    id: scenario
+    attributes:
+      label: 使用场景与希望改进的行为
+    validations:
+      required: true
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: 相关型号/固件、可能方案与验证条件

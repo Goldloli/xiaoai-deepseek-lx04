@@ -1,0 +1,159 @@
+{
+  "report_date": "2026-10-24",
+  "scope": "Single LX04 engineering record; no credentials, flash contents or raw voice logs included",
+  "device": {
+    "hardware": "LX04",
+    "stock_rom": "2.42.118",
+    "active_slot": "b",
+    "magisk": "30.7",
+    "model": "deepseek-flash"
+  },
+  "build": {
+    "upstream": "https://github.com/axcom/xiaobot",
+    "upstream_commit": "7c98861a48437fcb74ea6483ff365b1e63d7ab1c",
+    "ninego_commit": "a4c59c1576bd1eb6c5d80684ad25abd103cf6331",
+    "entrypoint": "./cmd/lx04-agent",
+    "target": "linux/arm GOARM=7 CGO_ENABLED=0",
+    "binary_sha256": "a92e50c7b63ba494a59c6bc12611c87c3947bf12cef693450779adbfa10c5343",
+    "binary_bytes": 19726496,
+    "patch_sha256": "0ffe3a973a91b7d2d213526b26c9e6101770acf6c7529a84033ab8a76af74190",
+    "built_at": "2026-10-24T13:30:19.835811+00:00",
+    "search_provider": "DeepSeek official /v1/tools/search",
+    "max_search_calls_per_question": 2
+  },
+  "source_tools": {
+    "mtkclient_commit": "7cb40e727727dfe3faa065eefb29b16ed29bbdf1",
+    "magisk_apk_version": "30.7",
+    "magisk_apk_sha256": "e0d32d2123532860f97123d927b1bb86c4e08e6fd8a48bfc6b5bee0afae9ebd5"
+  },
+  "backup_hashes": {
+    "emmc-user.bin": {
+      "size": 3959422976,
+      "sha256": "11045c8fdfb63ca974b00a6a7f3b5e18b23decb7e76e78e5d6e3e4ea0df74020"
+    },
+    "emmc-boot1.bin": {
+      "size": 2097152,
+      "sha256": "8d57e7ab6720b020b262672978acc896709abdc7c137e2b6e4f05faca3c362f2"
+    },
+    "emmc-boot2.bin": {
+      "size": 2097152,
+      "sha256": "625af7f598a737d32f7185b5dcef17d0c14a05e1dd661542d32c99b67c900af9"
+    },
+    "boot_a.bin": {
+      "size": 16777216,
+      "sha256": "fc0904c26ff8e61363c4eff9c241bde5ae4ff7b49c3153e19b365d38a9f8a0c4"
+    },
+    "boot_b.bin": {
+      "size": 16777216,
+      "sha256": "abf6d12481188b4ae08b1ed2573c2f12f9efe7b9b3d6fc651d686be9cc65ddd4"
+    },
+    "seccfg.bin": {
+      "size": 262144,
+      "sha256": "cfc2ba2c88cdc02565b27b1d98f2f2c7f90ceda58fe3f23518553fdad6097b33"
+    }
+  },
+  "final_boot_b": {
+    "previous_sha256": "8f9f48b8c7e682e9837bade9f54d4319598d34c2eeaca04ce9ee986e06a22ef0",
+    "candidate_sha256": "8db1b5d514a4d07649fc79a3ebdaf2ff50f31f1585a0a47c5caa107af6ee103e",
+    "changed_paths": [
+      "overlay.d/lx04-adb.rc",
+      "overlay.d/sbin/lx04-adb.pub",
+      "overlay.d/sbin/lx04-adb-key.sh",
+      "overlay.d/sbin/lx04-adb-keys",
+      "overlay.d/sbin/lx04-adb-auth.sh"
+    ],
+    "flashed": true,
+    "checks": [
+      "same_kernel",
+      "same_other_ramdisk_entries",
+      "same_boot_header",
+      "same_adb_auth",
+      "same_encryption_verity"
+    ]
+  },
+  "seccfg_candidate": {
+    "hwtype": "V3",
+    "original_sha256": "cfc2ba2c88cdc02565b27b1d98f2f2c7f90ceda58fe3f23518553fdad6097b33",
+    "candidate_sha256": "bdcead95d3e4fbdf9e3477465f6f84cc7815a7bea3f1977e1b6dbc7e1552a18a",
+    "size": 262144,
+    "round_trip_matches": true,
+    "original_lock_state": 1,
+    "candidate_lock_state": 3,
+    "dm_verity_unchanged": true,
+    "tail_preserved": true,
+    "flashed": true
+  },
+  "magisk_runtime_components": {
+    "busybox": {
+      "source": "lib/armeabi-v7a/libbusybox.so",
+      "sha256": "7edf6024ed2305dc7bc5d91bad6a8f0ebffbecdd41b8a861d0ced297a5ea1b6d"
+    },
+    "magisk": {
+      "source": "lib/armeabi-v7a/libmagisk.so",
+      "sha256": "750da5f48869be0dd90ed268e06ae5c324008b3342fba0e501f52ec0ce8e3b32"
+    },
+    "magiskboot": {
+      "source": "lib/armeabi-v7a/libmagiskboot.so",
+      "sha256": "0b19472b291ce9033c29a83155ff4c1b18be9d1d17d901d63e50f57436378762"
+    },
+    "magiskinit": {
+      "source": "lib/armeabi-v7a/libmagiskinit.so",
+      "sha256": "992245a7327481dff7a791b5b4db46d80b730c7aebfe992247d8bc785fc54c0b"
+    },
+    "magiskpolicy": {
+      "source": "lib/armeabi-v7a/libmagiskpolicy.so",
+      "sha256": "e5fafc1fa9486950ce9ba476f5723754d260014515ced72b4560238e6c560f3a"
+    },
+    "util_functions.sh": {
+      "source": "assets/util_functions.sh",
+      "sha256": "efe385ffdb72c7fc9b5bcef4267acc4f68ad73b2ac02bb577328f77ea66643eb"
+    },
+    "boot_patch.sh": {
+      "source": "assets/boot_patch.sh",
+      "sha256": "20de7208d610a267aaafafe09846c4458a240ba51656d05252fc1c9c7e7ada8f"
+    },
+    "addon.d.sh": {
+      "source": "assets/addon.d.sh",
+      "sha256": "ab56d64e7d846defb99342be68be063c9471fc88b9245b51ce6f7ea24ff47024"
+    },
+    "stub.apk": {
+      "source": "assets/stub.apk",
+      "sha256": "f0230e0864be255d963befa929ae1c0bb85c4df3e3578bb6cecc3049b6881eb0"
+    }
+  },
+  "acceptance": {
+    "autostart_verified": true,
+    "http_listeners": [],
+    "adb_secure": true,
+    "network_adb": false,
+    "selinux": "Enforcing",
+    "tested_audio_master_mute_restored": true,
+    "prior_auto_routing_user_confirmed": true,
+    "updated_clothing_routing": "user confirmed normal",
+    "search_api_direct_speaker_test": true,
+    "search_voice_user_confirmation": true,
+    "acceptance": "user confirmed all normal and satisfied"
+  },
+  "limits": [
+    "raw artifacts and source tools remain local and ignored by Git",
+    "no RPMB backup or write",
+    "no post-completion physical factory-restore drill",
+    "no exhaustive Mijia-device or long-duration test matrix",
+    "startup reboot verified before search feature; same startup mechanism retained after search update"
+  ],
+  "report_preparation_checks": {
+    "agent_hash_matches_manifest": true,
+    "patch_hash_matches_manifest": true,
+    "backup_hashes": "copied from originally verified manifests; multi-GB dumps not rehashed during report preparation",
+    "device_operations_during_report_preparation": false
+  },
+  "public_source": {
+    "root": "client/",
+    "patch_sha256": "d1c3498725c8e43a2a5843de449962837ae011ad43ec47ff40038d45ddd189d6",
+    "patch_applies_to_pinned_upstream": true,
+    "historical_build_is_deployed_device_build": true,
+    "historical_patch_is_not_public_sanitized_patch": true,
+    "private_device_selectors_removed": true,
+    "speaker_reflashed_during_publication": false
+  }
+}

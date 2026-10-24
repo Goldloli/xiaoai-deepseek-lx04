@@ -1,0 +1,26 @@
+XiaoSeek LX04 / xiaoai-deepseek-lx04
+Copyright 2026 Goldloli and contributors.
+
+This project contains source derived from axcom/xiaobot:
+https://github.com/axcom/xiaobot
+Commit: 7c98861a48437fcb74ea6483ff365b1e63d7ab1c
+Licensed under Apache License 2.0. Original notices are retained.
+
+third_party/ninego contains log and filelog from axcom/ninego:
+https://github.com/axcom/ninego
+Commit: a4c59c1576bd1eb6c5d80684ad25abd103cf6331
+Licensed under Apache License 2.0; its original LICENSE is included.
+
+client/miservice derives from MiService and retains its MIT license:
+Copyright (c) 2021-2022 Long Bai. See client/miservice/LICENSE.
+
+Except for components retaining their original notices, project additions
+are licensed under Apache License 2.0. The mtkclient patch and the five
+hardware/boot Python scripts identified in THIRD_PARTY.md are licensed under
+GPL-3.0-only; see LICENSES/GPL-3.0-only.txt.
+
+Source modification dates, modules, and pinned provenance are documented in
+THIRD_PARTY.md, CHANGELOG.md and third_party/UPSTREAM.json.
+
+Xiaomi, XiaoAI, DeepSeek and Magisk are names of their respective owners.
+This is an independent community project and is not an official product.

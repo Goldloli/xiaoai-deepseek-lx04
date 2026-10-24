@@ -1,0 +1,61 @@
+{
+  "xiaobot": {
+    "repository": "https://github.com/axcom/xiaobot",
+    "commit": "7c98861a48437fcb74ea6483ff365b1e63d7ab1c",
+    "license": "Apache-2.0; miservice retains MIT",
+    "location": "client",
+    "modified_or_added_go_files": [
+      "cmd/lx04-agent/main.go",
+      "cmd/lx04-bootstrap/main.go",
+      "cmd/lx04-bootstrap/main_test.go",
+      "cmd/lx04-netcheck/main.go",
+      "cmd/lx04-searchcheck/main.go",
+      "cmd/xiaobot.go",
+      "deepseekweb/client.go",
+      "deepseekweb/client_test.go",
+      "devicevoice/audio.go",
+      "devicevoice/events.go",
+      "devicevoice/events_test.go",
+      "jarvis/openai/client.go",
+      "jarvis/openai/client_tls_test.go",
+      "jarvis/openai/types.go",
+      "lx04_routing_test.go",
+      "miservice/account.go",
+      "miservice/account_test.go",
+      "miservice/otp.go",
+      "miservice/otp_test.go",
+      "miservice/token_store.go",
+      "runtimeenv/dns.go",
+      "runtimeenv/dns_test.go",
+      "voiceanswer/answer.go",
+      "voiceanswer/answer_test.go",
+      "xiaobot.go",
+      "xiaomi.go",
+      "xiaotalk.go"
+    ]
+  },
+  "ninego": {
+    "repository": "https://github.com/axcom/ninego",
+    "commit": "a4c59c1576bd1eb6c5d80684ad25abd103cf6331",
+    "license": "Apache-2.0",
+    "included_modules": [
+      "log",
+      "filelog"
+    ]
+  },
+  "mtkclient": {
+    "repository": "https://github.com/bkerler/mtkclient",
+    "commit": "7cb40e727727dfe3faa065eefb29b16ed29bbdf1",
+    "license": "GPL-3.0-only",
+    "distribution": "patch only; no downloaded binaries or payloads"
+  },
+  "publication": {
+    "date": "2026-10-24",
+    "changes": [
+      "private device selector replaces original device identifiers",
+      "local ninego replacements point to bundled modules",
+      "build and audit scripts, CI and docs",
+      "device startup DNS configurable; original installed script remains unchanged"
+    ]
+  }
+}

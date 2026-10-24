@@ -1,0 +1,72 @@
+diff --git a/mtkclient/Library/Connection/usblib.py b/mtkclient/Library/Connection/usblib.py
+index 54357de..734e726 100644
+--- a/mtkclient/Library/Connection/usblib.py
++++ b/mtkclient/Library/Connection/usblib.py
+@@ -131,7 +131,11 @@ class UsbClass(DeviceClass):
+         self._libusb_dll = None
+         self.queue = Queue()
+         self.rxleft = bytearray()
+-        if sys.platform.startswith('freebsd') or sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
++        if sys.platform.startswith('darwin'):
++            self.backend = usb.backend.libusb1.get_backend(
++                find_library=lambda x: '/opt/homebrew/lib/libusb-1.0.dylib'
++            )
++        elif sys.platform.startswith('freebsd') or sys.platform.startswith('linux'):
+             self.backend = usb.backend.libusb1.get_backend(find_library=lambda x: "libusb-1.0.so")
+         elif sys.platform.startswith('win32'):
+             # Prefer the bundled libusb DLL shipped with mtkclient (mtkclient/Windows)
+diff --git a/mtkclient/Library/Exploit/kamakiri2.py b/mtkclient/Library/Exploit/kamakiri2.py
+index 080f3fd..0ba1994 100644
+--- a/mtkclient/Library/Exploit/kamakiri2.py
++++ b/mtkclient/Library/Exploit/kamakiri2.py
+@@ -5,6 +5,7 @@ import hashlib
+ import logging
+ import array
+ import os
++import sys
+ from binascii import hexlify
+ from struct import pack, unpack
+ 
+@@ -64,6 +65,15 @@ class Kamakiri2(Exploitation, metaclass=LogBase):
+         # noinspection PyProtectedMember
+         if payloadaddr is None:
+             payloadaddr = self.chipconfig.brom_payload_addr
++        device = self.mtk.port.cdc.device
++        managed_claim = device._ctx.managed_claim_interface
++        if sys.platform == "darwin":
++            # macOS owns the CDC control interface. EP0 requests work without
++            # claiming interface 0; retain normal claims for data interfaces.
++            def claim_data_interface(dev, interface):
++                if interface != 0:
++                    return managed_claim(dev, interface)
++            device._ctx.managed_claim_interface = claim_data_interface
+         try:
+             # self.mtk.port.cdc.device.reset()
+             if self.linecode is None:
+@@ -74,6 +84,8 @@ class Kamakiri2(Exploitation, metaclass=LogBase):
+         except usb.core.USBError as e:
+             print("USB CORE ERROR")
+             print(e)
++        finally:
++            device._ctx.managed_claim_interface = managed_claim
+         return True
+ 
+     def bruteforce(self, args, startaddr=0x9900):
+diff --git a/mtkclient/Library/mtk_class.py b/mtkclient/Library/mtk_class.py
+index 8f0a101..d902c00 100644
+--- a/mtkclient/Library/mtk_class.py
++++ b/mtkclient/Library/mtk_class.py
+@@ -152,11 +152,8 @@ class Mtk(metaclass=LogBase):
+             interface = self.interface
+         if vid != -1 and pid != -1:
+             if interface == -1:
+-                for dev in default_ids:
+-                    if dev[0] == vid and dev[1] == pid:
+-                        interface = dev[2]
+-                        break
+-            portconfig = [[vid, pid, interface]]
++                interface = default_ids.get(vid, {}).get(pid, interface)
++            portconfig = {vid: {pid: interface}}
+         else:
+             portconfig = default_ids
+         self.port = Port(mtk=self, portconfig=portconfig, serialportname=serialportname, loglevel=self.__logger.level)
