@@ -33,6 +33,6 @@ Deployment requires authenticated root ADB and a compatible audio/logging implem
 
 Boot candidate generation, V1–V6 ADB work, bounded flashing/recovery scripts, startup templates, account verification, routing, audio handling and search are open. Default: Apache-2.0. The mtkclient patch and five hardware scripts retain GPL-3.0-only; MiService retains MIT. See [NOTICE](NOTICE) and [THIRD_PARTY.md](THIRD_PARTY.md).
 
-Limitations: one-device validation; rules can misroute; playback mute affects other audio; no multi-turn memory, custom screen rendering or complete process supervisor. Hardware modification can affect boot and encrypted data. The report distinguishes measured outcomes from untested paths.
+The launcher retries failed initialization and restarts an exited agent with capped backoff. Limitations: one-device validation; rules can misroute; playback mute affects other audio; no multi-turn memory or custom screen rendering. Hardware modification can affect boot and encrypted data. The report distinguishes measured outcomes from untested paths.
 
 Contributions: [CONTRIBUTING.md](CONTRIBUTING.md). Private vulnerability reports: [SECURITY.md](SECURITY.md). Independent community project; not affiliated with Xiaomi or DeepSeek.

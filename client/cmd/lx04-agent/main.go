@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -40,6 +41,15 @@ type agent struct {
 	pending    string
 	lastQuery  string
 	lastAt     time.Time
+}
+
+// Network errors can include signed login URLs. Keep those URLs out of logs.
+func safeError(err error) string {
+	var request *url.Error
+	if errors.As(err, &request) {
+		return fmt.Sprintf("%s: %v", request.Op, request.Err)
+	}
+	return err.Error()
 }
 
 func (a *agent) restore() {
@@ -144,7 +154,7 @@ func (a *agent) answer(ctx context.Context, generation int, query string) {
 	if err != nil {
 		a.pending = ""
 		a.restore()
-		log.Print("native TTS request failed; audio restored")
+		log.Printf("native TTS request failed; audio restored: %s", safeError(err))
 		a.mu.Unlock()
 		return
 	}
@@ -189,8 +199,8 @@ func main() {
 		log.Fatal("speaker configuration incomplete")
 	}
 	box := xiaobot.NewXiaoMi(cfg)
-	if box.InitMiBox() != nil {
-		log.Fatal("Xiaomi session initialization failed")
+	if err := box.InitMiBox(); err != nil {
+		log.Fatalf("Xiaomi session initialization failed: %s", safeError(err))
 	}
 	client := openai.NewClient(cfg.OpenAIKey, cfg.OpenAIBackend, "")
 	client.GPTOptions = cfg.GPTOptions
@@ -231,6 +241,9 @@ func main() {
 	}
 	if scanner.Err() != nil {
 		fmt.Fprintln(os.Stderr, "local speech listener read failed")
+	}
+	if ctx.Err() == nil {
+		log.Print("local speech listener stopped; agent exiting for supervised restart")
 	}
 	cancel()
 	cmd.Wait()

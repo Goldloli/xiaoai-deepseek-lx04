@@ -39,7 +39,7 @@ func (s *IOService) Request(uri string, data map[string]interface{}) (map[string
 	}
 
 	headers := http.Header{
-		"User-Agent":                 []string{"iOS-14.4-6.0.103-iPhone12,3--D7744744F7AF32F0544445285880DD63E47D9BE9-8816080-84A3F44E137B71AE-iPhone"},
+		"User-Agent":                 []string{UA},
 		"x-xiaomi-protocal-flag-cli": []string{"PROTOCAL-HTTP2"},
 		//"User-Agent":                 []string{"MICO/AndroidApp/@SHIP.TO.2A2FE0D7@/2.4.40"},
 		//"miot-accept-encoding":       []string{"GZIP"},

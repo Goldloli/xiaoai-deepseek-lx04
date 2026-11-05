@@ -26,7 +26,7 @@ func (mnas *AIService) Request(uri string, data url.Values, out any) error {
 	}
 
 	headers := http.Header{
-		"User-Agent": []string{"MiHome/6.0.103 (com.xiaomi.mihome; build:6.0.103.1; iOS 14.4.0) Alamofire/6.0.103 MICO/iOSApp/appStore/6.0.103"},
+		"User-Agent": []string{UA},
 	}
 
 	return mnas.account.Request("micoapi", "https://api2.mina.mi.com"+uri, data, nil, headers, true, out)

@@ -257,6 +257,12 @@ type DataCb func(tokens *Tokens, cookie map[string]string) url.Values
 func (ma *Account) NewRequest(sid, u string, data url.Values, cb DataCb, headers http.Header) *http.Request {
 	var req *http.Request
 	var body io.Reader
+	// AddCookie mutates the request headers. A renewal retry must not inherit
+	// the expired cookies appended by the first attempt to the caller's map.
+	headers = headers.Clone()
+	if headers == nil {
+		headers = make(http.Header)
+	}
 	cookies := []*http.Cookie{
 		{Name: "userId", Value: ma.token.UserId},
 		{Name: "serviceToken", Value: ma.token.Sids[sid].ServiceToken},
@@ -321,42 +327,37 @@ func (ma *Account) Request(sid, u string, data url.Values, cb DataCb, headers ht
 	}
 	defer resp.Body.Close()
 
-	apiCode := 0
+	payload, err := io.ReadAll(io.LimitReader(resp.Body, 4<<20))
+	if err != nil {
+		return err
+	}
+	var result struct {
+		Code    int    `json:"code"`
+		Message string `json:"message"`
+	}
+	decodeErr := json.Unmarshal(payload, &result)
 	if resp.StatusCode == http.StatusOK {
-		type _result struct {
-			Code    int    `json:"code"`
-			Message string `json:"message"`
-		}
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return err
-		}
 		if os.Getenv("XIAOBOT_API_TRACE") == "1" && req.URL.Hostname() == "userprofile.mina.mi.com" {
 			trace := struct {
 				URL      string
 				Header   http.Header
 				Response json.RawMessage
-			}{req.URL.String(), req.Header, json.RawMessage(data)}
+			}{req.URL.String(), req.Header, json.RawMessage(payload)}
 			b, _ := json.Marshal(trace)
 			os.WriteFile(filepath.Join(os.Getenv("HOME"), fmt.Sprintf("api-trace-%d.json", os.Getpid())), b, 0600)
 		}
-		var result _result
-		err = json.Unmarshal(data, &result)
-		if err != nil {
-			return err
+		if decodeErr != nil {
+			return decodeErr
 		}
 		if result.Code == 0 {
-			err = json.Unmarshal(data, output)
+			err = json.Unmarshal(payload, output)
 			return err
-		}
-		apiCode = result.Code
-
-		if strings.Contains(strings.ToLower(result.Message), "auth") {
-			resp.StatusCode = http.StatusUnauthorized
 		}
 	}
 
-	if resp.StatusCode == http.StatusUnauthorized && reLogin {
+	unauthorized := resp.StatusCode == http.StatusUnauthorized ||
+		(resp.StatusCode == http.StatusOK && strings.Contains(strings.ToLower(result.Message), "auth"))
+	if unauthorized && reLogin {
 		// Renew only the expired service token; retain the verified identity.
 		delete(ma.token.Sids, sid)
 		if ma.tokenStore != nil {
@@ -365,7 +366,19 @@ func (ma *Account) Request(sid, u string, data url.Values, cb DataCb, headers ht
 		return ma.Request(sid, u, data, cb, headers, false, output)
 	}
 
-	return fmt.Errorf("Xiaomi API request failed (HTTP %d, code %d)", resp.StatusCode, apiCode)
+	return &APIError{HTTPStatusCode: resp.StatusCode, Code: result.Code}
 }
 
+// APIError retains rejection codes without logging response bodies or credentials.
+type APIError struct {
+	HTTPStatusCode int
+	Code           int
+}
+
+func (e *APIError) Error() string {
+	return fmt.Sprintf("Xiaomi API request failed (HTTP %d, code %d)", e.HTTPStatusCode, e.Code)
+}
+
+// Use the same supported client identity for login and service calls. The old
+// MiHome 6.0.103 service identity is rejected with HTTP 429 / code -127.
 const UA = "APP/com.xiaomi.mihome APPV/11.3.203 iosPassportSDK/4.2.50 iOS/26.3.1 MK/aVBob25lMTcsMg== DEVT/aVBob25l DEVS/aU9T BRA/QXBwbGU= L/zh_CN"

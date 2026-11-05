@@ -46,3 +46,6 @@ last-search.json
 agent.pid
 client/config.json
 client/xiaomi.ini
+
+# Local social-media working files include raw references and machine paths
+/image-cards/
